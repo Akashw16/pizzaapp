@@ -10,6 +10,7 @@ import java.util.Optional;
 
 @Service
 public class CustomerService {
+
     @Autowired
     private CustomerRepository customerRepository;
 
@@ -21,15 +22,19 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
-    public Optional<Customer> findByEmail(String email) {
-        return Optional.ofNullable(customerRepository.findByEmail(email));
-    }
-
     public Optional<Customer> findById(Long id) {
         return customerRepository.findById(id);
     }
 
-    public Customer update(Customer customer) {
-        return customerRepository.save(customer);
+    public Customer updateCustomer(Long id, Customer customer) {
+        Optional<Customer> existingCustomer = customerRepository.findById(id);
+        if (existingCustomer.isPresent()) {
+            Customer updatedCustomer = existingCustomer.get();
+            updatedCustomer.setEmail(customer.getEmail());
+            updatedCustomer.setPassword(passwordEncoder.encode(customer.getPassword()));
+            return customerRepository.save(updatedCustomer);
+        } else {
+            throw new IllegalArgumentException("Customer with ID " + id + " not found");
+        }
     }
 }
